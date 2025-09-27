@@ -1,0 +1,29 @@
+name: alasall
+description: Event alarm app with custom mp3 and voice mixes
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_local_notifications: ^14.0.0
+  just_audio: ^0.9.30
+  flutter_tts: ^3.5.2
+  file_picker: ^5.2.2
+  shared_preferences: ^2.1.1
+  path_provider: ^2.0.11
+  timezone: ^0.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/silent.mp3

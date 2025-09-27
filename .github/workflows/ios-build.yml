@@ -1,0 +1,61 @@
+name: iOS-ipa-build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Ensure flutter project skeleton (create if missing)
+        run: |
+          flutter pub get || true
+          flutter create --org com.hupyth --project-name alasall .
+
+      - name: Get packages
+        run: flutter pub get
+
+      - name: Patch Info.plist to enable Background Audio
+        run: |
+          PLIST=ios/Runner/Info.plist
+          if [ -f "$PLIST" ]; then
+            if ! grep -q '<key>UIBackgroundModes</key>' "$PLIST"; then
+              # insert UIBackgroundModes right after the first <dict> occurrence
+              awk 'NR==1{print;next} 1' "$PLIST" > /tmp/Info.plist.tmp
+              awk 'BEGIN{insert=0} {print} /<dict>/{ if(insert==0){print "  <key>UIBackgroundModes</key>\n  <array>\n    <string>audio</string>\n  </array>"; insert=1}}' /tmp/Info.plist.tmp > /tmp/Info.plist && mv /tmp/Info.plist ios/Runner/Info.plist
+            fi
+          fi
+
+      - name: Update CocoaPods repo
+        run: pod repo update
+        working-directory: ios
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Prepare Payload
+        run: |
+          mkdir -p build/ios/iphoneos/Payload
+          mv build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
+
+      - name: Create ipa
+        run: |
+          cd build/ios/iphoneos
+          zip -qq -r -9 FlutterIpaExport.ipa Payload
+
+      - name: Upload release asset
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/ios/iphoneos/FlutterIpaExport.ipa
+          tag: v1.0
+          overwrite: true
+          body: "AlasAll auto-built IPA"
+
