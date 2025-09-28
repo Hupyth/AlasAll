@@ -1,5 +1,5 @@
 name: alasall
-description: Event alarm app with custom mp3 and voice mixes
+description: Simple Task Manager app
 publish_to: "none"
 
 version: 1.0.0+1
@@ -23,13 +23,5 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.0
 
-dependency_overrides:
-  file_picker:
-    git:
-      url: https://github.com/miguelpruivo/flutter_file_picker.git
-      ref: master
-
 flutter:
   uses-material-design: true
-  assets:
-    - assets/silent.mp3
